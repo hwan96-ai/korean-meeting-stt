@@ -12,6 +12,7 @@
     "build:oci": "node scripts/build-oci.mjs",
     "migrate:oci": "node --experimental-strip-types scripts/migrate-oci.mjs",
     "start:oci": "node .next/standalone/server.js",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "test:oci": "node --experimental-strip-types --test tests/runtime-oci.test.mjs",
     "start": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",

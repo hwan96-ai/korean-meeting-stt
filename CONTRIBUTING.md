@@ -3,7 +3,7 @@
 이슈와 PR 모두 환영합니다. 특히 아래 둘을 반깁니다.
 
 - **GPU 전사 결과.** 작성자는 GPU가 없어 `whisper_device=cuda`로 실제 전사를 돌려 보지 못했습니다. 돌려 보셨다면 GPU 모델, 드라이버와 CUDA 버전, 걸린 시간을 이슈로 알려 주세요.
-- **다른 환경에서 띄워 본 기록.** [docs/SELF-HOSTING.md](docs/SELF-HOSTING.md)는 작성자 서버 기준이라 빠진 단계가 있을 겁니다.
+- **다른 환경에서 띄워 본 기록.** [docs/QUICKSTART.md](docs/QUICKSTART.md)는 WSL2 Ubuntu 24.04에서만, [docs/SELF-HOSTING.md](docs/SELF-HOSTING.md)는 작성자 서버에서만 해 봤습니다.
 
 ## 지켜 주세요
 

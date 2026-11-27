@@ -24,7 +24,7 @@ flowchart LR
     K -->|gpt-transcribe 전사| OA
 ```
 
-- **웹 앱**은 루프백에만 묶여 있고, Cloudflare Access가 넘긴 JWT로 소유자 한 명인지 확인합니다(`lib/runtime-access.ts`).
+- **웹 앱**은 루프백에만 묶여 있고, Cloudflare Access가 넘긴 JWT로 소유자 한 명인지 확인합니다(`lib/runtime-access.ts`). 내 컴퓨터에서만 쓸 때는 Access 대신 로컬 로그인 모드(`MEETING_AUTH_MODE=local`, `lib/runtime-node.ts`)가 `http://127.0.0.1:<포트>`로 곧장 오고 일회용 코드로 받은 로그인 쿠키가 있는 요청만 소유자로 봅니다([QUICKSTART.md](QUICKSTART.md)).
 - **음성 작업기**는 웹에 작업을 달라고 묻는 쪽입니다. 작업기에 들어오는 연결은 없습니다. 평문 HTTP는 루프백 주소일 때만 허용하고, 원격 주소는 HTTPS만 씁니다.
 - 작업기는 전용 리눅스 사용자로 돌고 root 실행을 거부합니다. 설정은 systemd `LoadCredential`로만 받습니다([local_worker/SERVER.md](../local_worker/SERVER.md)).
 

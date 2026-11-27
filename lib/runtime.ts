@@ -20,6 +20,8 @@ export async function browserIdentity(headers: Headers): Promise<Identity | null
 export async function workerGateway(_request: Request): Promise<boolean> { return true; }
 export function signInPath(returnTo: string) { return `/signin-with-chatgpt?return_to=${encodeURIComponent(returnTo)}`; }
 export function signOutPath(returnTo: string) { return `/signout-with-chatgpt?return_to=${encodeURIComponent(returnTo)}`; }
+// The Sites build has no local login.
+export function localLoginResponse(_request: Request): Response | null { return null; }
 // The Sites build has no orchestrator door.
 export function integrationToken():string|null{return null;}
 export function integrationDailyLimit():number{return 200;}

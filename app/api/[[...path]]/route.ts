@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createJobSchema, idSchema, jobMode, metadataSchema, outputModeSchema, segmentsSchema, TEMPLATE_VERSION, type Job, type JobData } from "@/lib/contracts";
 import { ApiError, audioResponse, bucket, CHUNK_BYTES, completeUpload, db, deleteJob, device, digest, fail, getJob, markViewed, owner, parse, parts, putSetting, requireApiSpeechAvailable, requireGeneration, requirePcMode, requireWorkerGateway, retryCloudDeletes, setting, speechExecution, sweepCallContacts, unpack, update, uploadPart, workerJob } from "@/lib/server";
 import { integrationRoute } from "@/lib/integration";
-import { integrationDailyLimit, integrationToken, pushKeys } from "@/lib/runtime";
+import { integrationDailyLimit, integrationToken, localLoginResponse, pushKeys } from "@/lib/runtime";
 import { readSubscriptions, removeSubscription, saveSubscription } from "@/lib/push-store";
 import { allowedEndpoint, b64uDecode, isP256Public, sendPush } from "@/lib/web-push";
 import { transcriptText } from "@/lib/transcript-export";
@@ -24,6 +24,8 @@ async function handle(request:Request) {
     const path=new URL(request.url).pathname.replace(/^\/api\/?/,"").split("/").filter(Boolean);
     const method=request.method;
     // Orchestrator door: loopback + its own bearer token, checked before any owner or worker authentication.
+    // Local single-owner login (MEETING_AUTH_MODE=local only; null otherwise, so the path stays 404).
+    if(path[0]==="local-login"&&!path[1]){const r=localLoginResponse(request);if(r)return r;}
     if(path[0]==="integration")return await integrationRoute({get db(){return db();},get bucket(){return bucket();},token:integrationToken(),dailyLimit:integrationDailyLimit()},request,path.slice(1));
     if(path[0]==="worker") { await requireWorkerGateway(request); return await workerRoute(request,path.slice(1)); }
     const user=await owner(request);

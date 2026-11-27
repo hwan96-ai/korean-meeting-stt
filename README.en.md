@@ -4,6 +4,12 @@ A personal web app for Korean meeting recordings. Upload or record audio, get a 
 
 > **Not a product.** One person built this with AI ("vibe coding") for their own work. It comes with no support or compatibility promise. It is public so others can read the code and the design.
 
+![Upload, name the speakers, fix the transcript](docs/images/stt-flow.gif)
+
+The demo is a 2-minute synthetic meeting (one Korean TTS voice at three pitches, fictional names) transcribed on a laptop CPU with Whisper `base`; diarization split it into two speakers.
+
+**Run it on your own computer** (Linux or WSL2, no API key): [docs/QUICKSTART.md](docs/QUICKSTART.md) (in Korean; the commands are plain).
+
 ## How it works
 
 ```mermaid
@@ -40,9 +46,9 @@ Set `"whisper_device": "cuda", "whisper_compute_type": "float16"` in the worker 
 
 ## Limits
 
-- Login works only behind Cloudflare Access, for one owner. There is no local login mode yet.
+- One owner only. Behind Cloudflare Access when exposed (the author's setup), or `MEETING_AUTH_MODE=local` on a computer one person uses: only direct requests to `http://127.0.0.1:<port>` from a browser that opened a one-time login link printed in the terminal.
 - **Do not deploy `npm run build` / `npm start` yourself.** That build targets the OpenAI Sites host it started from and trusts the host's login headers, so anywhere else anyone can sign in. Use `npm run build:oci`.
-- Setup docs follow the author's server and have not been reproduced elsewhere ([docs/SELF-HOSTING.md](docs/SELF-HOSTING.md)).
+- The local quickstart was reproduced from a fresh clone on WSL2 Ubuntu 24.04. The server setup ([docs/SELF-HOSTING.md](docs/SELF-HOSTING.md)) follows the author's server and was not reproduced elsewhere.
 - Built for Korean meetings: local transcription is fixed to Korean and API transcription requests Korean (`ko`) by default; server mode has no setting to change it.
 - The code has an optional path that infers meeting info through a ChatGPT subscription (Codex CLI). It is the author's personal setup, its terms were not checked, and it is off unless configured.
 - `ops/` paths in code comments point to the author's private notes, which are not in this repository.
