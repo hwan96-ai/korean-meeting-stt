@@ -3,14 +3,14 @@ import { z } from "zod";
 const name = z
   .string()
   .min(1)
-  .max(256)
+  .refine((v) => v.length <= 256, "too long") // UTF-16 units, as zod 3 counted
   .regex(/^[^\s/\x00-\x1f\x7f]+$/u);
 const fields = { connectorId: name, actionName: name };
 
 // Reject extra invocation fields: account selection and native tool names belong
 // to the owning agent, not to the generated Site's request envelope.
 export const invocationSchema = z
-  .object({ ...fields, arguments: z.record(z.unknown()) })
+  .object({ ...fields, arguments: z.record(z.string(), z.unknown()) })
   .strict();
 export const grantSchema = z
   .object({ ...fields, readOnly: z.literal(true) })
@@ -40,14 +40,14 @@ export const driverMessageSchema = z.union([
   z
     .object({
       jsonrpc: z.literal("2.0"),
-      id: z.string().uuid(),
-      result: z.record(z.unknown()),
+      id: z.guid(),
+      result: z.record(z.string(), z.unknown()),
     })
     .strict(),
   z
     .object({
       jsonrpc: z.literal("2.0"),
-      id: z.string().uuid(),
+      id: z.guid(),
       error: z
         .object({
           code: z.number().int(),

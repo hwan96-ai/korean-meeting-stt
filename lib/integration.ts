@@ -4,6 +4,7 @@
 // - A call becomes an ordinary transcript-only job, so upload, speech, diarization and deletion are the same
 //   code paths as the owner's STT jobs (job-store.ts). Only call jobs are reachable through this door.
 import { z } from "zod";
+import { isoDatetimeOffset, utf16 } from "./text-schema.ts";
 import { CHUNK_BYTES, MAX_BYTES, MAX_DURATION, idSchema, metadataSchema, type CallInfo, type Job, type JobData } from "./contracts.ts";
 import { ApiError } from "./api-error.ts";
 import { boundedBody, clearDeletedCallContacts, digest, finishJobRemoval, finishUpload, listParts, loadJob, partCount, readSetting, removeJob, storePart } from "./job-store.ts";
@@ -21,19 +22,19 @@ const AUDIO_EXT = /\.(m4a|mp3|wav|webm|ogg|mp4|flac|aac|amr|3gp|3ga)$/i;
 export const AUDIO_MIME = new Set(["audio/mp4", "audio/m4a", "audio/x-m4a", "audio/mp4a-latm", "audio/aac", "audio/x-aac", "audio/aacp", "audio/mpeg", "audio/mp3", "audio/x-mpeg",
   "audio/wav", "audio/x-wav", "audio/wave", "audio/vnd.wave", "audio/ogg", "audio/opus", "audio/webm", "audio/flac", "audio/x-flac",
   "audio/amr", "audio/amr-wb", "audio/3gpp", "audio/3gpp2", "video/mp4", "video/3gpp"]);
-const mimeType = z.string().max(100).transform(v => v.split(";")[0].trim().toLowerCase()).refine(v => AUDIO_MIME.has(v), "음성 형식이 아닙니다.");
+const mimeType = utf16(100).transform(v => v.split(";")[0].trim().toLowerCase()).refine(v => AUDIO_MIME.has(v), "음성 형식이 아닙니다.");
 const sha = z.string().regex(/^[a-f0-9]{64}$/);
-const crmId = z.string().min(1).max(100).nullable().optional();
+const crmId = utf16(100, 1).nullable().optional();
 export const callRequestSchema = z.object({
   external_ref: z.string().regex(/^call:[A-Za-z0-9._:-]{1,190}$/),
-  started_at: z.string().datetime({ offset: true }),
+  started_at: isoDatetimeOffset(),
   duration_sec: z.number().int().min(0).max(MAX_DURATION),
   direction: z.enum(["in", "out"]),
-  counterpart: z.object({ name: z.string().max(100), phone_e164: z.string().regex(/^\+[1-9]\d{6,14}$/), crm_contact_id: crmId, crm_company_id: crmId }).strict(),
-  file: z.object({ name: z.string().min(1).max(255).regex(AUDIO_EXT), size: z.number().int().positive().max(MAX_BYTES), sha256: sha, mime: mimeType }).strict(),
+  counterpart: z.object({ name: utf16(100), phone_e164: z.string().regex(/^\+[1-9]\d{6,14}$/), crm_contact_id: crmId, crm_company_id: crmId }).strict(),
+  file: z.object({ name: utf16(255, 1).regex(AUDIO_EXT), size: z.number().int().positive().max(MAX_BYTES), sha256: sha, mime: mimeType }).strict(),
 }).strict();
 const completeSchema = z.object({ sha256: sha, part_checksums: z.array(sha).min(1).max(128) }).strict();
-const revertSchema = z.object({ external_ref: z.string().min(1).max(200) }).strict();
+const revertSchema = z.object({ external_ref: utf16(200, 1) }).strict();
 
 type CallRow = { external_ref: string; job_id: string; created_at: number; direction: "in" | "out"; started_at: string; duration_sec: number; counterpart_name: string | null; phone_e164: string | null; crm_contact_id: string | null; crm_company_id: string | null; file_size: number; file_sha256: string; file_mime: string; file_ext: string; reverting_at: number | null; reverted_at: number | null; job_deleted_at: number | null };
 

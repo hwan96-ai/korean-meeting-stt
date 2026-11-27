@@ -1,24 +1,26 @@
 import { z } from "zod";
+import { isoDatetimeOffset, utf16 } from "./text-schema.ts";
 import type { JobTiming, StoredProgress } from "./progress";
 export const MAX_BYTES = 512 * 1024 * 1024;
 export const CHUNK_BYTES = 4 * 1024 * 1024;
 export const MAX_DURATION = 4 * 60 * 60;
 export const TEMPLATE_VERSION = "2026-10-28.1";
-export const idSchema = z.string().uuid();
+// Any 8-4-4-4-12 hex id, as zod 3 accepted; zod 4's z.uuid() would also check the version and variant bits.
+export const idSchema = z.guid();
 export const outputModeSchema = z.enum(["minutes", "transcript"]);
 export type OutputMode = z.infer<typeof outputModeSchema>;
 export const jobMode = (job: {output_mode?: OutputMode}): OutputMode => job.output_mode ?? "minutes";
 export const metadataSchema = z.object({
-  organization: z.string().max(150).default(""), datetime: z.union([z.literal(""),z.string().datetime({offset:true})]).default(""),
-  place: z.string().max(200).default(""), meeting_format: z.string().max(80).default(""),
-  author: z.string().max(100).default(""), attendees: z.string().max(4000).default(""), week: z.string().max(30).default(""),
+  organization: utf16(150).default(""), datetime: z.union([z.literal(""),isoDatetimeOffset()]).default(""),
+  place: utf16(200).default(""), meeting_format: utf16(80).default(""),
+  author: utf16(100).default(""), attendees: utf16(4000).default(""), week: utf16(30).default(""),
 }).strict();
 export type Metadata = z.infer<typeof metadataSchema>;
 export const segmentSchema = z.object({
   segment_id: idSchema, start_ms: z.number().int().min(0).max(MAX_DURATION * 1000),
-  end_ms: z.number().int().min(1).max(MAX_DURATION * 1000), text: z.string().max(8000),
-  local_speaker_id: z.string().min(1).max(100), proposed_person_id: z.string().max(100).nullable().default(null),
-  confirmed_person_id: z.string().max(100).nullable().default(null), speaker_name: z.string().max(200).default(""),
+  end_ms: z.number().int().min(1).max(MAX_DURATION * 1000), text: utf16(8000),
+  local_speaker_id: utf16(100, 1), proposed_person_id: utf16(100).nullable().default(null),
+  confirmed_person_id: utf16(100).nullable().default(null), speaker_name: utf16(200).default(""),
   overlap: z.boolean().default(false), review_status: z.enum(["unreviewed", "confirmed", "uncertain"]).default("unreviewed"),
   timing_provenance: z.enum(["audio_clip_bounds","provider_segment","asr_words","asr_segments","manual"]).optional(),
 }).strict().refine(s => s.end_ms > s.start_ms, "종료 시각은 시작 시각보다 뒤여야 합니다.");
@@ -27,7 +29,7 @@ export const segmentsSchema = z.array(segmentSchema).max(20000).refine(ss => new
 export const createJobSchema = z.object({
   output_mode: outputModeSchema.default("minutes"),
   meeting_type: z.enum(["customer", "weekly"]).optional(), developer_requests: z.boolean().default(false), input_kind: z.enum(["file", "recording"]),
-  metadata: metadataSchema.optional(), filename: z.string().min(1).max(255), byte_size: z.number().int().positive().max(MAX_BYTES), mime_type: z.string().max(100), upload_id: idSchema,
+  metadata: metadataSchema.optional(), filename: utf16(255, 1), byte_size: z.number().int().positive().max(MAX_BYTES), mime_type: utf16(100), upload_id: idSchema,
 }).strict().superRefine((input,ctx)=>{
   if(input.output_mode==="minutes"){
     if(!input.meeting_type)ctx.addIssue({code:z.ZodIssueCode.custom,path:["meeting_type"],message:"회의 유형을 선택하세요."});
@@ -40,12 +42,12 @@ export type State = "uploading" | "waiting_worker" | "preparing" | "transcribing
 // Meeting info the server read from the transcript (ops/meeting-info-inference/SPEC.md).
 // Suggestions only: never part of `metadata` until the owner saves them.
 export const transcriptSuggestionItemSchema = z.object({
-  key: z.enum(["organization", "place", "meeting_format", "attendee"]), value: z.string().min(1).max(200), name: z.string().min(1).max(100).optional(),
-  segment_ids: z.array(idSchema).min(1).max(3), quote: z.string().min(1).max(300),
+  key: z.enum(["organization", "place", "meeting_format", "attendee"]), value: utf16(200, 1), name: utf16(100, 1).optional(),
+  segment_ids: z.array(idSchema).min(1).max(3), quote: utf16(300, 1),
 }).strict();
 export const metadataSuggestionsSchema = z.object({
   status: z.enum(["ok", "off", "skipped", "failed"]), reason: z.string().regex(/^[a-z0-9_]{1,60}$/).optional(),
-  model_id: z.string().max(200).optional(), created_at: z.number().int().min(0), truncated: z.boolean().optional(),
+  model_id: utf16(200).optional(), created_at: z.number().int().min(0), truncated: z.boolean().optional(),
   items: z.array(transcriptSuggestionItemSchema).max(25),
 }).strict();
 export type TranscriptSuggestionItem = z.infer<typeof transcriptSuggestionItemSchema>;

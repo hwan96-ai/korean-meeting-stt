@@ -1,4 +1,5 @@
 import {z} from "zod";
+import { utf16 } from "./text-schema.ts";
 
 // Terms the owner expects to hear (product names, acronyms). The worker sends them
 // to the speech API as `keywords` hints. These caps are application guards, kept
@@ -14,7 +15,7 @@ const FORBIDDEN=/[<>\p{C}]/u;
 const fold=(term:string)=>term.toLowerCase();
 
 export const speechKeywordsSchema=z.array(
-  z.string().min(1).max(MAX_KEYWORD_CHARS)
+  utf16(MAX_KEYWORD_CHARS, 1)
     .refine(term=>term===term.trim()&&!/\s{2,}/.test(term)&&!FORBIDDEN.test(term),"용어에 쓸 수 없는 문자가 있습니다."),
 ).max(MAX_KEYWORDS)
   .refine(terms=>new Set(terms.map(fold)).size===terms.length,"같은 용어가 두 번 있습니다.")
