@@ -134,7 +134,7 @@
   "lib/utils.ts": "53f3d3d070f0a9082934da25b875f9499855c2b0693868dd28be8c23d8730f68",
   "lib/web-push.ts": "2cda8d0a2b03546a4a89ed1709271bc67a478ce9ed9f348997cfb22afd22b990",
   "lib/workflow.ts": "92824832252607306db2f25a39441e1b3b21fb4d87e47a048951aa5d72368c67",
-  "LICENSE": "f66b8faa7d92d195f15e5531e2962fadf5370ce8a3fc2d4a4343f8c7e2d9a4dc",
+  "LICENSE": "1d40e215024e863d7fb0599e5878bda6d9cc5a1bc1980c17bb446544d9c3a952",
   "local_worker/__init__.py": "044eea1e45ad538a537900752ec3250e13d05202e1ca5dda623dd6b8ec5520cd",
   "local_worker/__main__.py": "c5edba6d936c0a6503ef8928f1db8e491617cce3bc8683730ad3657648bff384",
   "local_worker/api_circuit.py": "638990cf05be1d3a3c67b57f65ee2e51acdbecee82b6faf74a05d3f071f8b9ff",
