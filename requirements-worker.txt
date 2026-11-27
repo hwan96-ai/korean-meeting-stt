@@ -1,0 +1,10 @@
+# CPU-first processing (default whisper_device=cpu, int8); no API key is required for local speech.
+# NVIDIA GPU (whisper_device=cuda) also needs CUDA 12 cuBLAS and cuDNN 9, for example
+# `pip install nvidia-cublas-cu12 nvidia-cudnn-cu12==9.*` on Linux. See local_worker/SERVER.md.
+faster-whisper==1.2.1
+av==19.0.2
+numpy==2.5.4
+sherpa-onnx==1.13.8
+ctranslate2==4.8.4
+huggingface-hub==2.3.0
+# Tests use standard-library unittest; the cloud/API clients use urllib.
